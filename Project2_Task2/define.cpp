@@ -165,7 +165,6 @@ SkillCallback PaintCb = [](BattleField *field, Actor *me, const Skill *skill) {
 // Synthesis技能回调函数
 SkillCallback SynthesisCb = [](BattleField *field, Actor *me, const Skill *skill) {
     std::stringstream ss;
-    Slime *mySlime = me->slimeOnCourt;
 
     double recoverRatio = .3;
     switch (Weather_T(field->attr["weather"])) {
