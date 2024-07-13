@@ -45,13 +45,12 @@ void BattleField::SetActor(Actor *a, Actor *b) {
 void BattleField::BeforeGame_() {
     // welcome messages
     LOG("Welcome to Battle of Slimes 2!\n");
-    std::vector<Slime_T> playerSlimeTs, enemySlimeTs = this->actors_[1]->ChooseStartingSlime();
 
     // sunny actor
-     LOG("Enemy has Pink, Green and Red, starting with Pink\n");
-
+    // LOG("Enemy has Pink, Green and Red, starting with Red\n");
     // rainy actor
-//    LOG("Enemy has Green, Blue and Yellow, starting with", this->actors_[1]->slimeOnCourt->slimeName + "\n");
+    std::vector<Slime_T> playerSlimeTs, enemySlimeTs = this->actors_[1]->ChooseStartingSlime();
+    LOG("Enemy has Green, Blue and Yellow, starting with", this->actors_[1]->slimeOnCourt->slimeName + "\n");
 
     LOG("You can select three from five (1 for Green, 2 for Red, 3 for Blue, 4 for Yellow, 5 for Pink).\n");
 
@@ -101,6 +100,7 @@ void BattleField::StateCheck_() {
 }
 
 std::vector<ActionInfo> BattleField::ChooseActionPhase_() {
+    bool notBack;
     Action_T enemyAction = this->actors_[1]->ChooseAction(), playerAction;
     std::vector<ActionInfo> actions = {{}, {}};
     std::pair<bool, Skill_T> playerChooseSkill;
@@ -127,7 +127,6 @@ std::vector<ActionInfo> BattleField::ChooseActionPhase_() {
     }
 
     // player choose action
-    bool notBack;
     while (true) {
         // player choose action
         playerAction = this->actors_[0]->ChooseAction();
@@ -158,7 +157,6 @@ std::vector<ActionInfo> BattleField::ChooseActionPhase_() {
     return actions;
 }
 
-// function to attack each other
 // the priority of firstActor's skill is higher
 void BattleField::attackEachOther(int firstActor, int secondActor, std::vector<ActionInfo> & actions) {
     ActionInfo firstActorAction = actions[firstActor], secondActorAction = actions[secondActor];
@@ -387,6 +385,7 @@ bool BattleField::ShowInformationPhase_() {
     // update weatherCnt
     this->attr["weatherCnt"] = (this->attr["weatherCnt"]) ? this->attr["weatherCnt"] - 1 : 0;
 
+
     if (this->actors_[0]->grave.size() == 3) {
         LOG("You lose\n");
     } else if (this->actors_[1]->grave.size() == 3) {
@@ -404,6 +403,8 @@ bool BattleField::ShowInformationPhase_() {
             this->actors_[1]->slimeOnCourt->health, "\n");
         return false;
     }
+
+
 
     return true;
 }
