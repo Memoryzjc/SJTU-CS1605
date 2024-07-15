@@ -91,7 +91,7 @@ void BattleField::StateCheck_() {
             this->actors_[0]->slimeOnCourt->attr["faint"] = 0;
         }
     }
-    
+
     if (this->actors_[1]->slimeOnCourt->attr["faint"]) {
         if (!this->actors_[1]->slimeOnCourt->attr["faintCnt"]) {
             LOG(Whose("Enemy"), this->actors_[1]->slimeOnCourt->slimeName, "wakes up\n");
@@ -154,7 +154,7 @@ std::vector<ActionInfo> BattleField::ChooseActionPhase_() {
             break;
         }
     }
-    
+
     return actions;
 }
 
@@ -360,6 +360,10 @@ void BattleField::HandleBeatenSlimesPhase_() {
         }
     }
 
+    if (this->actors_[0]->grave.size() == 3) {
+        this->actors_[0]->slimeOnCourt = nullptr;
+    }
+
     if (this->actors_[1]->slimeOnCourt->health == 0) {
         LOG(Whose("Enemy"), this->actors_[1]->slimeOnCourt->slimeName, "is beaten\n");
 
@@ -377,12 +381,20 @@ void BattleField::HandleBeatenSlimesPhase_() {
             }
         }
     }
+
+    if (this->actors_[1]->grave.size() == 3) {
+        this->actors_[1]->slimeOnCourt = nullptr;
+    }
 }
 
 bool BattleField::ShowInformationPhase_() {
     // update faintCnt
-    this->actors_[0]->slimeOnCourt->attr["faintCnt"]--;
-    this->actors_[1]->slimeOnCourt->attr["faintCnt"]--;
+    if (this->actors_[0]->slimeOnCourt) {
+        this->actors_[0]->slimeOnCourt->attr["faintCnt"]--;
+    }
+    if (this->actors_[1]->slimeOnCourt) {
+        this->actors_[1]->slimeOnCourt->attr["faintCnt"]--;
+    }
 
     // update weatherCnt
     this->attr["weatherCnt"] = (this->attr["weatherCnt"]) ? this->attr["weatherCnt"] - 1 : 0;
