@@ -98,25 +98,27 @@ SkillCallback SlapCb = [](BattleField *field, Actor *me, const Skill *skill) {
     std::stringstream ss;
     Slime *mySlime = me->slimeOnCourt, *oppSlime = me->opp->slimeOnCourt;
 
-    int damage = int(round(skill->power * mySlime->attack / oppSlime->defense));
+    double damage = typeRatio.at({skill->type, oppSlime->type}) *
+                           double(weatherRatio[{Weather_T(field->attr["weather"]), skill->type}]) / 100.
+                           * skill->power * mySlime->attack / oppSlime->defense;
 
     if (oppSlime->attr["faint"]) {
-        damage *= 2;
+        damage *= 2.;
         oppSlime->attr["faint"] = oppSlime->attr["faintCnt"] = 0;
-        PRINT(ss, "Damage:", damage);
-        if (oppSlime->health - damage > 0.) {
+        PRINT(ss, "Damage:", int(round(damage)));
+        if (oppSlime->health - int(round(damage)) > 0.) {
             PRINT(ss, "\n");
             PRINT(ss, BattleField::Whose(me->opp->GetName()), oppSlime->slimeName, "wakes up");
         }
     }
 
     if (ss.str().empty()) {
-        PRINT(ss, "Damage:", damage);
+        PRINT(ss, "Damage:", int(round(damage)));
     }
 
     return SkillCbReturn {
             .success = true,
-            .damage = damage,
+            .damage = int(round(damage)),
             .prompt = ss.str()
     };
 };
@@ -235,7 +237,9 @@ SkillCallback ThunderCb = [](BattleField *field, Actor *me, const Skill *skill) 
         success = true;
         Slime *mySlime = me->slimeOnCourt, *oppSlime = me->opp->slimeOnCourt;
 
-        damage = int(round(typeRatio.at({skill->type, oppSlime->type}) * skill->power * mySlime->attack / oppSlime->defense));
+        damage = int(round(typeRatio.at({skill->type, oppSlime->type}) *
+                           double(weatherRatio[{Weather_T(field->attr["weather"]), skill->type}]) / 100.
+                           * skill->power * mySlime->attack / oppSlime->defense));
         PRINT(ss, "Damage:", damage);
 
         if (oppSlime->attr["faint"]) {

@@ -26,7 +26,7 @@ void BattleField::Run() {
         std::vector<ActionInfo> actions = this->ChooseActionPhase_();
 
         if (actions[0].action == Action_T::Escape) {
-            LOG("You escape\n");
+            LOG("You Escape\n");
             return;
         }
 
@@ -48,7 +48,7 @@ void BattleField::BeforeGame_() {
     std::vector<Slime_T> playerSlimeTs, enemySlimeTs = this->actors_[1]->ChooseStartingSlime();
 
     // sunny actor
-     LOG("Enemy has Pink, Green and Red, starting with Pink\n");
+     LOG("Enemy has Pink, Green and Red, starting with Pink.\n");
 
     // rainy actor
 //    LOG("Enemy has Green, Blue and Yellow, starting with", this->actors_[1]->slimeOnCourt->slimeName + "\n");
@@ -60,11 +60,11 @@ void BattleField::BeforeGame_() {
     LOG("You have", allSlimes.at(playerSlimeTs[0]).slimeName + ',',
         allSlimes.at(playerSlimeTs[1]).slimeName, "and",
         allSlimes.at(playerSlimeTs[2]).slimeName + ", starting with",
-        this->actors_[0]->slimeOnCourt->slimeName, "\n");
+        this->actors_[0]->slimeOnCourt->slimeName + "\n");
     LOG(Whose("You"), this->actors_[0]->slimeOnCourt->slimeName + ": HP",
         this->actors_[0]->slimeOnCourt->health, "||",
         Whose("Enemy"), this->actors_[1]->slimeOnCourt->slimeName + ": HP",
-        this->actors_[1]->slimeOnCourt->health, "\n");
+        std::to_string(this->actors_[1]->slimeOnCourt->health) + "\n");
 
     // game start messages
     LOG("Battle starts!\n");
@@ -76,7 +76,7 @@ void BattleField::StateCheck_() {
         case Weather::Sunny:
         case Weather::Rainy:
             if (!this->attr["weatherCnt"]) {
-                LOG("Weather becomes normal.\n");
+                LOG("Weather becomes normal\n");
                 this->attr["weather"] = Weather_T::Normal;
             }
             break;
@@ -91,7 +91,7 @@ void BattleField::StateCheck_() {
             this->actors_[0]->slimeOnCourt->attr["faint"] = 0;
         }
     }
-
+    
     if (this->actors_[1]->slimeOnCourt->attr["faint"]) {
         if (!this->actors_[1]->slimeOnCourt->attr["faintCnt"]) {
             LOG(Whose("Enemy"), this->actors_[1]->slimeOnCourt->slimeName, "wakes up\n");
@@ -154,7 +154,7 @@ std::vector<ActionInfo> BattleField::ChooseActionPhase_() {
             break;
         }
     }
-
+    
     return actions;
 }
 
@@ -286,7 +286,7 @@ void BattleField::PerformActionPhase_(std::vector<ActionInfo> &actions) {
             LOG("You send", this->actors_[0]->slimeOnCourt->slimeName + '\n');
             LOG("Enemy sends", this->actors_[1]->slimeOnCourt->slimeName + '\n');
         } else if (playerAction.action == Action_T::Skill) {
-            if (allSkills.at(playerAction.u.skill).priority > allSkills.at(playerAction.u.skill).priority) {
+            if (allSkills.at(playerAction.u.skill).priority > allSkills.at(enemyAction.u.skill).priority) {
                 // the priority of player's skill is higher
                 this->attackEachOther(0, 1, actions);
             } else if (allSkills.at(playerAction.u.skill).priority < allSkills.at(enemyAction.u.skill).priority) {
@@ -361,7 +361,7 @@ void BattleField::HandleBeatenSlimesPhase_() {
     }
 
     if (this->actors_[0]->grave.size() == 3) {
-        this->actors_[0]->slimeOnCourt =- nullptr;
+        this->actors_[0]->slimeOnCourt = nullptr;
     }
 
     if (this->actors_[1]->slimeOnCourt->health == 0) {
@@ -383,7 +383,7 @@ void BattleField::HandleBeatenSlimesPhase_() {
     }
 
     if (this->actors_[1]->grave.size() == 3) {
-        this->actors_[1]->slimeOnCourt =- nullptr;
+        this->actors_[1]->slimeOnCourt = nullptr;
     }
 }
 
@@ -392,7 +392,6 @@ bool BattleField::ShowInformationPhase_() {
     if (this->actors_[0]->slimeOnCourt) {
         this->actors_[0]->slimeOnCourt->attr["faintCnt"]--;
     }
-
     if (this->actors_[1]->slimeOnCourt) {
         this->actors_[1]->slimeOnCourt->attr["faintCnt"]--;
     }
@@ -401,20 +400,20 @@ bool BattleField::ShowInformationPhase_() {
     this->attr["weatherCnt"] = (this->attr["weatherCnt"]) ? this->attr["weatherCnt"] - 1 : 0;
 
     if (this->actors_[0]->grave.size() == 3) {
-        LOG("You lose\n");
+        LOG("You Lose\n");
     } else if (this->actors_[1]->grave.size() == 3) {
-        LOG("You win\n");
+        LOG("You Win\n");
     } else if (this->rounds_ == this->maxRounds_) {
         LOG(Whose("You"), this->actors_[0]->slimeOnCourt->slimeName + ": HP",
             this->actors_[0]->slimeOnCourt->health, "||",
             Whose("Enemy"), this->actors_[1]->slimeOnCourt->slimeName + ": HP",
-            this->actors_[1]->slimeOnCourt->health, "\n");
+            std::to_string(this->actors_[1]->slimeOnCourt->health) + "\n");
         LOG("Draw\n");
     } else {
         LOG(Whose("You"), this->actors_[0]->slimeOnCourt->slimeName + ": HP",
             this->actors_[0]->slimeOnCourt->health, "||",
             Whose("Enemy"), this->actors_[1]->slimeOnCourt->slimeName + ": HP",
-            this->actors_[1]->slimeOnCourt->health, "\n");
+            std::to_string(this->actors_[1]->slimeOnCourt->health) + "\n");
         return false;
     }
 

@@ -17,23 +17,31 @@ void BattleField::Reset() {
 void BattleField::Run() {
     this->BeforeGame_();
 
-    bool ending = false;
-    while (!ending) {
-        LOG("--------------------------------------------------\n");
-        this->StateCheck_();
-        LOG("Round", ++this->rounds_);
-        LOG('\n');
-        std::vector<ActionInfo> actions = this->ChooseActionPhase_();
+    if (easy2d::Game::init()) {
+        GraphSlime graph(this->actors_[0], this->actors_[1]);
 
-        if (actions[0].action == Action_T::Escape) {
-            LOG("You Escape\n");
-            return;
+        bool ending = false;
+        while (!ending) {
+            LOG("--------------------------------------------------\n");
+            this->StateCheck_();
+            graph.Update();
+            LOG("Round", ++this->rounds_);
+            LOG('\n');
+            std::vector<ActionInfo> actions = this->ChooseActionPhase_();
+
+            if (actions[0].action == Action_T::Escape) {
+                LOG("You Escape\n");
+                return;
+            }
+
+            this->PerformActionPhase_(actions);
+            graph.Update();
+            this->HandleBeatenSlimesPhase_();
+            ending = this->ShowInformationPhase_();
         }
-
-        this->PerformActionPhase_(actions);
-        this->HandleBeatenSlimesPhase_();
-        ending = this->ShowInformationPhase_();
     }
+
+    easy2d::Game::destroy();
 }
 
 void BattleField::SetActor(Actor *a, Actor *b) {
@@ -48,10 +56,10 @@ void BattleField::BeforeGame_() {
     std::vector<Slime_T> playerSlimeTs, enemySlimeTs = this->actors_[1]->ChooseStartingSlime();
 
     // sunny actor
-//     LOG("Enemy has Pink, Green and Red, starting with Pink.\n");
+     LOG("Enemy has Pink, Green and Red, starting with Pink.\n");
 
     // rainy actor
-    LOG("Enemy has Green, Blue and Yellow, starting with", this->actors_[1]->slimeOnCourt->slimeName + "\n");
+//    LOG("Enemy has Green, Blue and Yellow, starting with", this->actors_[1]->slimeOnCourt->slimeName + "\n");
 
     LOG("You can select three from five (1 for Green, 2 for Red, 3 for Blue, 4 for Yellow, 5 for Pink).\n");
 
@@ -180,7 +188,7 @@ void BattleField::attackEachOther(int firstActor, int secondActor, std::vector<A
                                                                   this->actors_[secondActor],
                                                                   &allSkills.at(secondActorAction.u.skill));
             this->actors_[firstActor]->slimeOnCourt->health =
-                    std::max(this->actors_[firstActor]->slimeOnCourt->health - secondActorRet.damage, 0);
+                    max(this->actors_[firstActor]->slimeOnCourt->health - secondActorRet.damage, 0);
 
             LOG(this->Whose(this->actors_[secondActor]->GetName()),
                 this->actors_[secondActor]->slimeOnCourt->slimeName, "uses",
@@ -193,7 +201,7 @@ void BattleField::attackEachOther(int firstActor, int secondActor, std::vector<A
                                                              this->actors_[firstActor],
                                                              &allSkills.at(firstActorAction.u.skill));
         this->actors_[secondActor]->slimeOnCourt->health =
-                std::max(this->actors_[secondActor]->slimeOnCourt->health - firstActorRet.damage, 0);
+                max(this->actors_[secondActor]->slimeOnCourt->health - firstActorRet.damage, 0);
         LOG(this->Whose(this->actors_[firstActor]->GetName()),
             this->actors_[firstActor]->slimeOnCourt->slimeName, "uses",
             allSkills.at(firstActorAction.u.skill).skillName + '!', firstActorRet.prompt + '\n');
@@ -231,7 +239,7 @@ void BattleField::attackEachOther(int firstActor, int secondActor, std::vector<A
                                                                       this->actors_[secondActor],
                                                                       &allSkills.at(secondActorAction.u.skill));
                 this->actors_[firstActor]->slimeOnCourt->health =
-                        std::max(this->actors_[firstActor]->slimeOnCourt->health - secondActorRet.damage, 0);
+                        max(this->actors_[firstActor]->slimeOnCourt->health - secondActorRet.damage, 0);
 
                 LOG(this->Whose(this->actors_[secondActor]->GetName()),
                     this->actors_[secondActor]->slimeOnCourt->slimeName, "uses",
@@ -272,7 +280,7 @@ void BattleField::PerformActionPhase_(std::vector<ActionInfo> &actions) {
                                                                     this->actors_[1],
                                                                     &allSkills.at(enemyAction.u.skill));
                     this->actors_[0]->slimeOnCourt->health =
-                        std::max(this->actors_[0]->slimeOnCourt->health - ret.damage, 0);
+                        max(this->actors_[0]->slimeOnCourt->health - ret.damage, 0);
                     LOG(Whose("Enemy"), this->actors_[1]->slimeOnCourt->slimeName, "uses",
                         allSkills.at(enemyAction.u.skill).skillName + '!', ret.prompt + '\n');
                 }
@@ -329,7 +337,7 @@ void BattleField::PerformActionPhase_(std::vector<ActionInfo> &actions) {
                                                                      this->actors_[0],
                                                                      &allSkills.at(playerAction.u.skill));
                     this->actors_[1]->slimeOnCourt->health =
-                            std::max(this->actors_[1]->slimeOnCourt->health - ret.damage, 0);
+                            max(this->actors_[1]->slimeOnCourt->health - ret.damage, 0);
                     LOG(Whose("You"), this->actors_[0]->slimeOnCourt->slimeName, "uses",
                         allSkills.at(playerAction.u.skill).skillName + '!', ret.prompt + '\n');
                 }

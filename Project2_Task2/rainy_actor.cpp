@@ -1,7 +1,8 @@
 ﻿#include <cassert>
+#include <random>
+
 #include "actor.h"
 #include "battlefield.h"
-
 
 RainyActor::RainyActor() {
     this->attr["revivalPotion"] = 1;
@@ -10,13 +11,13 @@ RainyActor::RainyActor() {
 std::vector<Slime_T> RainyActor::ChooseStartingSlime() {
     // shuffle the vector of slimes to get the starting slimes
     std::vector<Slime_T> slimes = {Slime_T::G, Slime_T::B, Slime_T::Y};
-    ShuffleVector(slimes);
+    int slimeIndex = RandomWithProbability(1. / 3.) ? 0 : (RandomWithProbability(1. / 2.) ? 1 : 2);
 
     this->availSlimes = {{Slime_T::G, allSlimes.at(Slime_T::G)},
                          {Slime_T::B, allSlimes.at(Slime_T::B)},
                          {Slime_T::Y, allSlimes.at(Slime_T::Y)}};
 
-    this->slimeOnCourt = &this->availSlimes[slimes[0]];
+    this->slimeOnCourt = &this->availSlimes[slimes[slimeIndex]];
 
     return slimes;
 }
@@ -24,14 +25,14 @@ std::vector<Slime_T> RainyActor::ChooseStartingSlime() {
 Action_T RainyActor::ChooseAction() {
     Slime *oppSlime = this->opp->slimeOnCourt, *mySlime = this->slimeOnCourt;
 
-    if (this->grave.contains(Slime_T::B) && this->attr["revivalPotion"]) {
+    if (this->grave.find(Slime_T::B) != this->grave.end() && this->attr["revivalPotion"]) {
         return Action_T::Potion;
     }
 
     switch (mySlime->slime) {
         case Slime_T::G:
             if (oppSlime->type == Type::Fire &&
-                this->availSlimes.contains(Slime_T::B)) {
+                this->availSlimes.find(Slime_T::B) != this->availSlimes.end()) {
                 return Action_T::Change;
             }
 
@@ -39,11 +40,11 @@ Action_T RainyActor::ChooseAction() {
         case Slime_T::B:
             if ((this->field->attr["weather"] != Weather_T::Sunny && oppSlime->type == Type::Thunder) ||
                 (this->field->attr["weather"] == Weather_T::Rainy && oppSlime->type == Type::Grass)) {
-                if (this->availSlimes.contains(Slime_T::G)) {
+                if (this->availSlimes.find(Slime_T::G) != this->availSlimes.end()) {
                     return Action_T::Change;
                 } else {
                     if (this->field->attr["weather"] == Weather_T::Rainy &&
-                        this->availSlimes.contains(Slime_T::Y)) {
+                        this->availSlimes.find(Slime_T::Y) != this->availSlimes.end()) {
                         return Action_T::Change;
                     } else {
                         return Action_T::Skill;
@@ -53,8 +54,8 @@ Action_T RainyActor::ChooseAction() {
 
             return Action_T::Skill;
         default:
-            if ((oppSlime->type == Type::Fire && this->availSlimes.contains(Slime_T::B)) ||
-                (oppSlime->type != Type::Fire && this->field->attr["weather"] != Weather_T::Rainy && this->availSlimes.contains(Slime_T::G))) {
+            if ((oppSlime->type == Type::Fire && this->availSlimes.find(Slime_T::B) != this->availSlimes.end()) ||
+                (oppSlime->type != Type::Fire && this->field->attr["weather"] != Weather_T::Rainy && this->availSlimes.find(Slime_T::G) != this->availSlimes.end())) {
                 return Action_T::Change;
             } else {
                 return Action_T::Skill;
@@ -69,27 +70,27 @@ std::pair<bool, Slime_T> RainyActor::ChooseSlime(bool active) {
     if (active) {
         switch (this->slimeOnCourt->slime) {
             case Slime_T::G:
-                assert(this->availSlimes.contains(Slime_T::B));
+                assert(this->availSlimes.find(Slime_T::B) != this->availSlimes.end());
                 ret.second = Slime_T::B;
                 this->slimeOnCourt = &this->availSlimes[Slime_T::B];
                 break;
             case Slime_T::B:
-                if (this->availSlimes.contains(Slime_T::G)) {
+                if (this->availSlimes.find(Slime_T::G) != this->availSlimes.end()) {
                     ret.second = Slime_T::G;
                     this->slimeOnCourt = &this->availSlimes[Slime_T::G];
                 } else {
-                    assert(this->availSlimes.contains(Slime_T::Y));
+                    assert(this->availSlimes.find(Slime_T::Y) != this->availSlimes.end());
                     ret.second = Slime_T::Y;
                     this->slimeOnCourt = &this->availSlimes[Slime_T::Y];
                 }
                 break;
             default:
                 if (this->opp->slimeOnCourt->type == Type::Fire) {
-                    assert(this->availSlimes.contains(Slime_T::B));
+                    assert(this->availSlimes.find(Slime_T::B) != this->availSlimes.end());
                     ret.second = Slime_T::B;
                     this->slimeOnCourt = &this->availSlimes[Slime_T::B];
                 } else {
-                    assert(this->availSlimes.contains(Slime_T::G));
+                    assert(this->availSlimes.find(Slime_T::G) != this->availSlimes.end());
                     ret.second = Slime_T::G;
                     this->slimeOnCourt = &this->availSlimes[Slime_T::G];
                 }
@@ -98,18 +99,18 @@ std::pair<bool, Slime_T> RainyActor::ChooseSlime(bool active) {
         switch (this->slimeOnCourt->slime) {
             case Slime_T::G:
             case Slime_T::Y:
-                if (this->availSlimes.contains(Slime_T::B)) {
+                if (this->availSlimes.find(Slime_T::B) != this->availSlimes.end()) {
                     this->slimeOnCourt = &this->availSlimes[Slime_T::B];
                     ret.second = Slime_T::B;
                 } else {
                     this->slimeOnCourt = (this->slimeOnCourt->slime == Slime_T::G)
-                            ? &this->availSlimes[Slime_T::Y] : &this->availSlimes[Slime_T::G];
+                                         ? &this->availSlimes[Slime_T::Y] : &this->availSlimes[Slime_T::G];
                     ret.second = (this->slimeOnCourt->slime == Slime_T::G) ? Slime_T::G : Slime_T::Y;
                 }
 
                 break;
             default:
-                if (this->availSlimes.contains(Slime_T::G)) {
+                if (this->availSlimes.find(Slime_T::G) != this->availSlimes.end()) {
                     this->slimeOnCourt = &this->availSlimes[Slime_T::G];
                     ret.second = Slime_T::G;
                 } else {

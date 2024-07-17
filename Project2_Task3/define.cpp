@@ -185,10 +185,10 @@ SkillCallback SynthesisCb = [](BattleField *field, Actor *me, const Skill *skill
             double(allSlimes.at(me->slimeOnCourt->slime).health))));
 
     // recover health but not exceed the maximum health
-    me->slimeOnCourt->health = std::min(me->slimeOnCourt->health + recoverHealth,
+    me->slimeOnCourt->health = min(me->slimeOnCourt->health + recoverHealth,
                                         allSlimes.at(me->slimeOnCourt->slime).health);
     
-    PRINT(ss, "Recovery:" ,recoverHealth);
+    PRINT(ss, "Recovery:" , std::to_string(recoverHealth));
 
     return SkillCbReturn {
             .success = true,

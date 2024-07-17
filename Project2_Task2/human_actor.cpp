@@ -41,7 +41,7 @@ Action_T HumanActor::ChooseAction() {
     int action;
     if (this->grave.size() != 2) {
         while (true) {
-            LOG("Choose your action (0 for escape, 1 for skill, 2 for change): ");
+            LOG("Select your action (0 for escape, 1 for skill, 2 for change): ");
             std::cin >> action;
             if (action >= 0 && action <= 2) {
                 return static_cast<Action_T>(action);
@@ -49,7 +49,7 @@ Action_T HumanActor::ChooseAction() {
         }
     } else {
         while(true) {
-            LOG("Choose your action (0 for escape, 1 for skill): ");
+            LOG("Select your action (0 for escape, 1 for skill): ");
             std::cin >> action;
             if (action >= 0 && action <= 1) {
                 return static_cast<Action_T>(action);
@@ -66,12 +66,12 @@ std::pair<bool, Slime_T> HumanActor::ChooseSlime(bool active) {
     res.first = true;
 
     for (int i = 0; i < this->allSlimeTs.size(); i++) {
-        if (this->allSlimeTs[i] != this->slimeOnCourt->slime &&
-            this->availSlimes.contains(this->allSlimeTs[i])) {
-            alterSlimeIndex.push_back(i);
-        }
+    if (this->allSlimeTs[i] != this->slimeOnCourt->slime &&
+        this->availSlimes.find(this->allSlimeTs[i]) != this->availSlimes.end()) {
+        alterSlimeIndex.push_back(i);
     }
-    
+}
+
     if (active) {
         while (true) {
             if (alterSlimeIndex.size() == 2) {
